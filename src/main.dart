@@ -4,7 +4,7 @@ import 'dart:io';
 void main() async {
   final server = await HttpServer.bind(
     InternetAddress.loopbackIPv4,
-    3000,
+    80,
   );
   print('Listening on localhost:${server.port}');
 
@@ -12,8 +12,7 @@ void main() async {
     HttpResponse response = req.response;
     if (req.method == 'POST' && req.uri.path.startsWith('/hook')) {
       try {
-        String content =
-            await utf8.decoder.bind(req).join(); /*2*/
+        String content = await utf8.decoder.bind(req).join(); /*2*/
         var data = jsonDecode(content) as Map; /*3*/
 
         req.response
@@ -25,6 +24,10 @@ void main() async {
           ..statusCode = HttpStatus.internalServerError
           ..write("Exception during file I/O: $e.");
       }
+    } else {
+      response
+        ..statusCode = HttpStatus.accepted
+        ..write("ok");
     }
 
     await req.response.close();
